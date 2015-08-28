@@ -151,19 +151,19 @@ enum DecompTypes {
 
 /** norm types
 - For one array:
-\f[norm =  \forkthree{\|\texttt{src1}\|_{L_{\infty}} =  \max _I | \texttt{src1} (I)|}{if  \(\texttt{normType} = \texttt{NORM\_INF}\) }
-{ \| \texttt{src1} \| _{L_1} =  \sum _I | \texttt{src1} (I)|}{if  \(\texttt{normType} = \texttt{NORM\_L1}\) }
-{ \| \texttt{src1} \| _{L_2} =  \sqrt{\sum_I \texttt{src1}(I)^2} }{if  \(\texttt{normType} = \texttt{NORM\_L2}\) }\f]
+\f[norm =  \forkthree{\|\texttt{src1}\|_{L_{\infty}} =  \max _I | \texttt{src1} (I)|}{if  \(\texttt{normType} = \texttt{NORM_INF}\) }
+{ \| \texttt{src1} \| _{L_1} =  \sum _I | \texttt{src1} (I)|}{if  \(\texttt{normType} = \texttt{NORM_L1}\) }
+{ \| \texttt{src1} \| _{L_2} =  \sqrt{\sum_I \texttt{src1}(I)^2} }{if  \(\texttt{normType} = \texttt{NORM_L2}\) }\f]
 
 - Absolute norm for two arrays
-\f[norm =  \forkthree{\|\texttt{src1}-\texttt{src2}\|_{L_{\infty}} =  \max _I | \texttt{src1} (I) -  \texttt{src2} (I)|}{if  \(\texttt{normType} = \texttt{NORM\_INF}\) }
-{ \| \texttt{src1} - \texttt{src2} \| _{L_1} =  \sum _I | \texttt{src1} (I) -  \texttt{src2} (I)|}{if  \(\texttt{normType} = \texttt{NORM\_L1}\) }
-{ \| \texttt{src1} - \texttt{src2} \| _{L_2} =  \sqrt{\sum_I (\texttt{src1}(I) - \texttt{src2}(I))^2} }{if  \(\texttt{normType} = \texttt{NORM\_L2}\) }\f]
+\f[norm =  \forkthree{\|\texttt{src1}-\texttt{src2}\|_{L_{\infty}} =  \max _I | \texttt{src1} (I) -  \texttt{src2} (I)|}{if  \(\texttt{normType} = \texttt{NORM_INF}\) }
+{ \| \texttt{src1} - \texttt{src2} \| _{L_1} =  \sum _I | \texttt{src1} (I) -  \texttt{src2} (I)|}{if  \(\texttt{normType} = \texttt{NORM_L1}\) }
+{ \| \texttt{src1} - \texttt{src2} \| _{L_2} =  \sqrt{\sum_I (\texttt{src1}(I) - \texttt{src2}(I))^2} }{if  \(\texttt{normType} = \texttt{NORM_L2}\) }\f]
 
 - Relative norm for two arrays
-\f[norm =  \forkthree{\frac{\|\texttt{src1}-\texttt{src2}\|_{L_{\infty}}    }{\|\texttt{src2}\|_{L_{\infty}} }}{if  \(\texttt{normType} = \texttt{NORM\_RELATIVE\_INF}\) }
-{ \frac{\|\texttt{src1}-\texttt{src2}\|_{L_1} }{\|\texttt{src2}\|_{L_1}} }{if  \(\texttt{normType} = \texttt{NORM\_RELATIVE\_L1}\) }
-{ \frac{\|\texttt{src1}-\texttt{src2}\|_{L_2} }{\|\texttt{src2}\|_{L_2}} }{if  \(\texttt{normType} = \texttt{NORM\_RELATIVE\_L2}\) }\f]
+\f[norm =  \forkthree{\frac{\|\texttt{src1}-\texttt{src2}\|_{L_{\infty}}    }{\|\texttt{src2}\|_{L_{\infty}} }}{if  \(\texttt{normType} = \texttt{NORM_RELATIVE_INF}\) }
+{ \frac{\|\texttt{src1}-\texttt{src2}\|_{L_1} }{\|\texttt{src2}\|_{L_1}} }{if  \(\texttt{normType} = \texttt{NORM_RELATIVE_L1}\) }
+{ \frac{\|\texttt{src1}-\texttt{src2}\|_{L_2} }{\|\texttt{src2}\|_{L_2}} }{if  \(\texttt{normType} = \texttt{NORM_RELATIVE_L2}\) }\f]
   */
 enum NormTypes { NORM_INF       = 1,
                  NORM_L1        = 2,
@@ -305,6 +305,7 @@ enum BorderTypes {
 #define CV_SUPPRESS_DEPRECATED_START
 #define CV_SUPPRESS_DEPRECATED_END
 #endif
+#define CV_UNUSED(name) (void)name
 //! @endcond
 
 /*! @brief Signals an error and raises the exception.
@@ -492,11 +493,9 @@ _AccTp normL2Sqr(const _Tp* a, const _Tp* b, int n)
     return s;
 }
 
-inline float normL2Sqr(const float* a, const float* b, int n)
+static inline float normL2Sqr(const float* a, const float* b, int n)
 {
-    if( n >= 8 )
-        return hal::normL2Sqr_(a, b, n);
-    float s = 0;
+    float s = 0.f;
     for( int i = 0; i < n; i++ )
     {
         float v = a[i] - b[i];
@@ -527,20 +526,22 @@ _AccTp normL1(const _Tp* a, const _Tp* b, int n)
 
 inline float normL1(const float* a, const float* b, int n)
 {
-    if( n >= 8 )
-        return hal::normL1_(a, b, n);
-    float s = 0;
+    float s = 0.f;
     for( int i = 0; i < n; i++ )
     {
-        float v = a[i] - b[i];
-        s += std::abs(v);
+        s += std::abs(a[i] - b[i]);
     }
     return s;
 }
 
 inline int normL1(const uchar* a, const uchar* b, int n)
 {
-    return hal::normL1_(a, b, n);
+    int s = 0;
+    for( int i = 0; i < n; i++ )
+    {
+        s += std::abs(a[i] - b[i]);
+    }
+    return s;
 }
 
 template<typename _Tp, typename _AccTp> static inline
@@ -572,6 +573,15 @@ CV_EXPORTS_W float cubeRoot(float val);
  @param y y-coordinate of the vector.
  */
 CV_EXPORTS_W float fastAtan2(float y, float x);
+
+/** proxy for hal::LU */
+CV_EXPORTS int LU(float* A, size_t astep, int m, float* b, size_t bstep, int n);
+/** proxy for hal::LU */
+CV_EXPORTS int LU(double* A, size_t astep, int m, double* b, size_t bstep, int n);
+/** proxy for hal::Cholesky */
+CV_EXPORTS bool Cholesky(float* A, size_t astep, int m, float* b, size_t bstep, int n);
+/** proxy for hal::Cholesky */
+CV_EXPORTS bool Cholesky(double* A, size_t astep, int m, double* b, size_t bstep, int n);
 
 ////////////////// forward declarations for important OpenCV types //////////////////
 

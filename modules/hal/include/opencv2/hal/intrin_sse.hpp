@@ -614,6 +614,16 @@ inline v_int32x4 operator * (const v_int32x4& a, const v_int32x4& b)
     __m128i d1 = _mm_unpackhi_epi32(c0, c1);
     return v_int32x4(_mm_unpacklo_epi64(d0, d1));
 }
+inline v_uint32x4& operator *= (v_uint32x4& a, const v_uint32x4& b)
+{
+    a = a * b;
+    return a;
+}
+inline v_int32x4& operator *= (v_int32x4& a, const v_int32x4& b)
+{
+    a = a * b;
+    return a;
+}
 
 inline void v_mul_expand(const v_int16x8& a, const v_int16x8& b,
                          v_int32x4& c, v_int32x4& d)
@@ -1138,6 +1148,17 @@ OPENCV_HAL_IMPL_SSE_UNPACKS(v_uint32x4, epi32, OPENCV_HAL_NOP, OPENCV_HAL_NOP)
 OPENCV_HAL_IMPL_SSE_UNPACKS(v_int32x4, epi32, OPENCV_HAL_NOP, OPENCV_HAL_NOP)
 OPENCV_HAL_IMPL_SSE_UNPACKS(v_float32x4, ps, _mm_castps_si128, _mm_castsi128_ps)
 OPENCV_HAL_IMPL_SSE_UNPACKS(v_float64x2, pd, _mm_castpd_si128, _mm_castsi128_pd)
+
+template<int s, typename _Tpvec>
+inline _Tpvec v_extract(const _Tpvec& a, const _Tpvec& b)
+{
+    const int w = sizeof(typename _Tpvec::lane_type);
+    const int n = _Tpvec::nlanes;
+    __m128i ra, rb;
+    ra = _mm_srli_si128(a.val, s*w);
+    rb = _mm_slli_si128(b.val, (n-s)*w);
+    return _Tpvec(_mm_or_si128(ra, rb));
+}
 
 inline v_int32x4 v_round(const v_float32x4& a)
 { return v_int32x4(_mm_cvtps_epi32(a.val)); }
