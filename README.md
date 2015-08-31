@@ -9,6 +9,9 @@
 * Q&A forum: <http://answers.opencv.org>
 * Issue tracking: <https://github.com/Itseez/opencv/issues>
 
+### Chinese Resources
+[【OpenCV入门教程】](http://blog.csdn.net/zhmxy555/article/category/1923021)   
+
 #### Contributing
 
 Please read before starting work on a pull request: <https://github.com/Itseez/opencv/wiki/How_to_contribute>
